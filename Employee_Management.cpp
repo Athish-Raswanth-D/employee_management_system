@@ -4,7 +4,7 @@
 #include <sstream>
 using namespace std;
 
-#define MAX_EMPLOYEES 10000000000000
+#define MAX_EMPLOYEES 1000
 
 struct Employee {
     string name;
