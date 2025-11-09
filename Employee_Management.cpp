@@ -16,7 +16,9 @@ struct Employee {
 
 int empCount = 0;
 Employee emp[MAX_EMPLOYEES];
+string currentUserRole = "";
 
+// ------------------ File Handling ------------------
 void saveToFile() {
     ofstream file("employees.txt");
     for (int i = 0; i < empCount; ++i) {
@@ -44,6 +46,30 @@ void loadFromFile() {
     file.close();
 }
 
+// ------------------ Login System ------------------
+bool login() {
+    string username, password;
+    cout << "\n---- Login ----\n";
+    cout << "Username: ";
+    cin >> username;
+    cout << "Password: ";
+    cin >> password;
+
+    if (username == "admin" && password == "admin123") {
+        currentUserRole = "admin";
+        return true;
+    }
+    else if (username == "emp" && password == "emp123") {
+        currentUserRole = "employee";
+        return true;
+    }
+    else {
+        cout << "❌ Invalid credentials. Try again.\n";
+        return false;
+    }
+}
+
+// ------------------ Admin Functions ------------------
 void build() {
     cout << "Build employee table for TechNova Pvt Ltd\n";
     cout << "Enter number of employees to register: ";
@@ -57,7 +83,6 @@ void build() {
         cout << "Experience (years): "; cin >> emp[i].experience;
         cout << "Age: "; cin >> emp[i].age;
     }
-
     saveToFile();
 }
 
@@ -71,7 +96,7 @@ void insert() {
         empCount++;
         saveToFile();
     } else {
-        cout << "Employee limit reached (Max: " << MAX_EMPLOYEES << ")\n";
+        cout << "Employee limit reached.\n";
     }
 }
 
@@ -82,16 +107,16 @@ void deleteEmployee() {
 
     for (int i = 0; i < empCount; ++i) {
         if (emp[i].id == id) {
-            for (int j = i; j < empCount - 1; ++j) {
+            for (int j = i; j < empCount - 1; ++j)
                 emp[j] = emp[j + 1];
-            }
+
             empCount--;
             saveToFile();
-            cout << "Record deleted successfully.\n";
+            cout << "✅ Record deleted successfully.\n";
             return;
         }
     }
-    cout << "Employee ID not found.\n";
+    cout << "❌ Employee ID not found.\n";
 }
 
 void search() {
@@ -109,33 +134,77 @@ void search() {
             return;
         }
     }
-    cout << "Employee not found.\n";
+    cout << "❌ Employee not found.\n";
 }
 
-void menu() {
-    int choice;
-    loadFromFile();
-    do {
-        cout << "\n--- Employee Management System ---\n";
-        cout << "1. Build Employee Table\n";
-        cout << "2. Insert New Employee\n";
-        cout << "3. Delete Employee\n";
-        cout << "4. Search Employee\n";
-        cout << "5. Exit\n";
-        cout << "Enter your choice: ";
-        cin >> choice;
+// ------------------ Employee Limited Access ------------------
+void viewSelf() {
+    long int id;
+    cout << "Enter your Employee ID: ";
+    cin >> id;
 
-        switch (choice) {
-            case 1: build(); break;
-            case 2: insert(); break;
-            case 3: deleteEmployee(); break;
-            case 4: search(); break;
-            case 5: cout << "Exiting system. Goodbye!\n"; break;
-            default: cout << "Invalid choice. Try again.\n";
+    for (int i = 0; i < empCount; ++i) {
+        if (emp[i].id == id) {
+            cout << "\n--- Your Details ---\n";
+            cout << "Name: " << emp[i].name << "\n";
+            cout << "ID: " << emp[i].id << "\n";
+            cout << "Designation: " << emp[i].designation << "\n";
+            cout << "Experience: " << emp[i].experience << " years\n";
+            cout << "Age: " << emp[i].age << " years\n";
+            return;
         }
-    } while (choice != 5);
+    }
+    cout << "❌ Your record not found.\n";
 }
 
+// ------------------ Menus ------------------
+void menu() {
+    loadFromFile();
+
+    while (!login());
+
+    int choice;
+
+    if (currentUserRole == "admin") {
+        do {
+            cout << "\n--- Admin Menu ---\n";
+            cout << "1. Build Employee Table\n";
+            cout << "2. Insert New Employee\n";
+            cout << "3. Delete Employee\n";
+            cout << "4. Search Employee\n";
+            cout << "5. Exit\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            switch (choice) {
+                case 1: build(); break;
+                case 2: insert(); break;
+                case 3: deleteEmployee(); break;
+                case 4: search(); break;
+                case 5: cout << "Goodbye!\n"; break;
+                default: cout << "Invalid choice.\n";
+            }
+        } while (choice != 5);
+    }
+
+    else if (currentUserRole == "employee") {
+        do {
+            cout << "\n--- Employee Menu ---\n";
+            cout << "1. View My Details\n";
+            cout << "2. Exit\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            switch (choice) {
+                case 1: viewSelf(); break;
+                case 2: cout << "Goodbye!\n"; break;
+                default: cout << "Invalid choice.\n";
+            }
+        } while (choice != 2);
+    }
+}
+
+// ------------------ Main ------------------
 int main() {
     menu();
     return 0;
